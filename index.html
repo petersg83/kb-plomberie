@@ -230,7 +230,7 @@ h1,h2,h3{line-height:1.15}
 .pied summary::-webkit-details-marker{display:none}
 .mentions{margin:10px 0 0;max-width:64ch;line-height:1.6;font-size:13px}
 
-.appel-sticky{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--or);color:var(--encre);text-decoration:none;font-weight:800;font-size:17px;padding:18px;box-shadow:0 -4px 16px rgba(38,70,83,.25)}
+.appel-sticky{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--or);color:var(--encre);text-decoration:none;font-weight:800;font-size:17px;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(38,70,83,.25);transform:translateZ(0);will-change:transform}
 .appel-sticky:hover{background:var(--or-fonce);color:var(--encre)}
 
 @media (min-width:900px){
