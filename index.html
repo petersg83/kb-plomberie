@@ -161,6 +161,8 @@ h1,h2,h3{line-height:1.15}
 .zone-point{width:14px;height:14px;border-radius:50%;background:var(--or);box-shadow:0 0 0 6px rgba(233,196,106,.3)}
 .zone-centre strong{color:var(--bleu-nuit);font-size:17px}
 .zone-centre span{color:var(--gris-texte);font-size:14px}
+.zone-map{width:100%;height:clamp(320px,50vw,430px);border-radius:16px;overflow:hidden;border:1px solid var(--bordure);box-shadow:0 6px 20px rgba(28,37,67,.10);z-index:0}
+.carte-etiquette{font-weight:700;color:var(--bleu-nuit)}
 
 .avis{background:var(--bleu-nuit);color:#fff}
 .avis-entete{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:30px}
@@ -385,7 +387,7 @@ h1,h2,h3{line-height:1.15}
       <p class="zone-note">…et toutes les communes voisines. Un doute ? <a href="tel:+33614566574">Appelez-moi</a>, je vous confirme tout de suite.</p>
     </div>
     <div class="zone-carte">
-      <div class="zone-cercle">
+      <div class="zone-cercle" id="carte-zone">
         <div class="zone-centre">
           <span class="zone-point" aria-hidden="true"></span>
           <strong>Tourves</strong>
@@ -508,6 +510,7 @@ h1,h2,h3{line-height:1.15}
           Assurance décennale : April — tous travaux de plomberie couverts.<br>
           Hébergement : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis — cloudflare.com.<br>
           Ce site ne dépose aucun cookie et ne collecte aucune donnée personnelle.
+          La carte de la zone d'intervention utilise un fond de carte © les contributeurs d'OpenStreetMap, chargé depuis les serveurs de la Fondation OpenStreetMap (openstreetmap.org/copyright).
         </p>
       </details>
       <span>© 2026 KB Plomberie Var</span>
@@ -564,6 +567,73 @@ h1,h2,h3{line-height:1.15}
     if (e.key === 'ArrowLeft') montrer(idx - 1);
     if (e.key === 'ArrowRight') montrer(idx + 1);
   });
+})();
+
+(function () {
+  var conteneur = document.getElementById('carte-zone');
+  if (!conteneur) return;
+
+  function initCarte() {
+    conteneur.innerHTML = '';
+    conteneur.className = 'zone-map';
+    conteneur.setAttribute('aria-label', "Carte de la zone d'intervention : Tourves et 50 km alentour");
+    var centre = [43.403176, 5.8715986];
+    var carte = L.map(conteneur, {
+      scrollWheelZoom: false,
+      dragging: !L.Browser.mobile
+    }).setView(centre, 9);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(carte);
+    var cercle = L.circle(centre, {
+      radius: 50000,
+      color: '#2A9D8F',
+      weight: 2,
+      dashArray: '6 8',
+      fillColor: '#2A9D8F',
+      fillOpacity: 0.08
+    }).addTo(carte);
+    L.circleMarker(centre, {
+      radius: 7,
+      color: '#fff',
+      weight: 2,
+      fillColor: '#E9C46A',
+      fillOpacity: 1
+    }).addTo(carte).bindTooltip('Tourves', {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -8],
+      className: 'carte-etiquette'
+    });
+    carte.fitBounds(cercle.getBounds(), { padding: [10, 10] });
+  }
+
+  var lance = false;
+  function chargerCarte() {
+    if (lance) return;
+    lance = true;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'assets/leaflet/leaflet.css';
+    document.head.appendChild(css);
+    var js = document.createElement('script');
+    js.src = 'assets/leaflet/leaflet.js';
+    js.onload = initCarte;
+    document.head.appendChild(js);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entrees) {
+      if (entrees.some(function (e) { return e.isIntersecting; })) {
+        obs.disconnect();
+        chargerCarte();
+      }
+    }, { rootMargin: '600px' });
+    obs.observe(conteneur);
+  } else {
+    chargerCarte();
+  }
 })();
 </script>
 
